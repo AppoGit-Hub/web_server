@@ -32,7 +32,7 @@ def create_graph_from_request(type, stat, filename, title):
     if response.status_code == 200:
         json_content, error = utils.str_to_json(response.text)
         if error == constant.JSON_FILE_LOAD_SUCCES:
-            create_graph(json_content, utils.get_path_from_resource(filename), title)
+            create_graph(json_content, utils.get_path_for_resource(filename), title)
         else:
             print(f"Couldnt str_to_json {filename}")
     else:
