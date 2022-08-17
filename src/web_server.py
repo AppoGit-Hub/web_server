@@ -32,7 +32,7 @@ def create_graph_from_request(type, stat, filename, title):
     if response.status_code == 200:
         json_content, error = utils.str_to_json(response.text)
         if error == constant.JSON_FILE_LOAD_SUCCES:
-            create_graph(json_content, f"{constant.DATA_FOLDER}/{filename}", title)
+            create_graph(json_content, utils.get_path_from_resource(filename), title)
         else:
             print(f"Couldnt str_to_json {filename}")
     else:
@@ -62,7 +62,7 @@ def create_graph(dict, filename, title):
 class WebServer(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.endswith(".png"):            
-            image_content = get_file_from_cache(f"{constant.DATA_FOLDER}/{self.path[1:]}", constant.FILE_TYPE_IMAGE)
+            image_content = get_file_from_cache(utils.get_path_for_resource(self.path[1:]), constant.FILE_TYPE_IMAGE)
             
             self.send_response(200)
             self.send_header("Content-type", "image/png")
@@ -74,7 +74,7 @@ class WebServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
-            with open(f"{constant.DATA_FOLDER}/favicon.ico", "rb") as file:
+            with open(utils.get_path_for_resource("favicon.ico"), "rb") as file:
                 image_content_list = file.readlines()  
                 image_content = bytes()
                 for image_byte in image_content_list:
@@ -84,13 +84,13 @@ class WebServer(BaseHTTPRequestHandler):
         else:
             start_time = time.perf_counter()
 
-            main_content = get_file_from_cache(f"{constant.DATA_FOLDER}/index.html")
+            main_content = get_file_from_cache(utils.get_path_for_resource("index.html"))
             page_code = 200
 
             if self.path == "/":
                 extra_page = "Select stats to view"
             elif self.path == "/average":
-                extra_page = get_file_from_cache(f"{constant.DATA_FOLDER}/average.html")
+                extra_page = get_file_from_cache(utils.get_path_for_resource("average.html"))
                 need_refresh = get_refresh_from_api("average")
                 need_refresh = json.loads(need_refresh.text)
                 if need_refresh:                
@@ -99,7 +99,7 @@ class WebServer(BaseHTTPRequestHandler):
                     create_graph_from_request_simple("average", "reply")
                     create_graph_from_request_simple("average", "retweet")
             elif self.path == "/total":
-                extra_page = get_file_from_cache(f"{constant.DATA_FOLDER}/total.html")
+                extra_page = get_file_from_cache(utils.get_path_for_resource("total.html"))
                 need_refresh = get_refresh_from_api("total")
                 need_refresh = json.loads(need_refresh.text)
                 if need_refresh:
@@ -109,14 +109,14 @@ class WebServer(BaseHTTPRequestHandler):
                     create_graph_from_request_simple("total", "retweet")
                     create_graph_from_request_simple("total", "tweet")               
             elif self.path == "/time":
-                extra_page = get_file_from_cache(f"{constant.DATA_FOLDER}/time.html")
+                extra_page = get_file_from_cache(utils.get_path_for_resource("time.html"))
                 need_refresh = get_refresh_from_api("time")
                 need_refresh = json.loads(need_refresh.text)                
                 if need_refresh:
                     create_graph_from_request("time", "hour", "hour_create_at.png", "Hour tweets creation time of the last 7 days")
                     create_graph_from_request("time", "day", "day_create_at.png", "Day tweets creation time of the last 7 days")
             else:
-                extra_page = get_file_from_cache(f"{constant.DATA_FOLDER}/page_not_found.html")
+                extra_page = get_file_from_cache(utils.get_path_for_resource("page_not_found.html"))
                 page_code = 204
 
             finish_time = time.perf_counter()

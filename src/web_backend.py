@@ -18,7 +18,7 @@ class StatManager:
         }
 
     def does_stats_need_refesh(self, stat_type):
-        api_permanent_file, error = utils.read_json_from_file(f"{constant.DATA_FOLDER}/{constant.API_PERMANENT_DATA_FILENAME}")
+        api_permanent_file, error = utils.read_json_from_file(utils.get_path_for_resource(constant.API_PERMANENT_DATA_FILENAME))
         last_time_got_followers_stats = datetime.today()
         if error == constant.JSON_FILE_LOAD_SUCCES:
             last_time_got_followers_stats = utils.str_to_datetime(api_permanent_file["last_time_got_followers_stats"])
@@ -59,7 +59,7 @@ def get_stats(type, stat_name):
     filename_of_stat, error = utils.follow_path_in_dict(constant.STATS_TYPES_WITH_NAMES, f"{type}/{stat_name}")
     json_content = {}
     if error == constant.FOLLOW_PATH_SUCCES:
-        json_content = get_file_cache(f"{constant.DATA_FOLDER}/{filename_of_stat}")
+        json_content = get_file_cache(utils.get_path_for_resource(filename_of_stat))
     return json_content, error
 
 @app.get("/refresh")
@@ -75,7 +75,7 @@ def get_average_graphs(type, stat):
 
 @app.on_event("startup")
 def on_startup():
-    permanent_data, error = utils.read_json_from_file(f"{constant.DATA_FOLDER}/{constant.DATA_SAVE_FILENAME}")
+    permanent_data, error = utils.read_json_from_file(utils.get_path_for_resource(constant.DATA_SAVE_FILENAME))
     if error == constant.JSON_FILE_LOAD_SUCCES:
         stat_manager.stats_last_time_refresh = {
             "average" : utils.str_to_datetime(permanent_data["average"]),
@@ -87,7 +87,7 @@ def on_startup():
 
 @app.on_event("shutdown")
 def on_shutdown():
-    error = utils.write_json_to_file(f"{constant.DATA_FOLDER}/{constant.DATA_SAVE_FILENAME}", {
+    error = utils.write_json_to_file(utils.get_path_for_resource(constant.DATA_SAVE_FILENAME), {
         "average" : str(stat_manager.stats_last_time_refresh["average"]),
         "total" : str(stat_manager.stats_last_time_refresh["total"]),
         "time" : str(stat_manager.stats_last_time_refresh["time"]),

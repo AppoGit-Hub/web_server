@@ -6,6 +6,9 @@ import requests
 import socket
 import constant
 
+def get_path_for_resource(file_name):
+    return f"{constant.DATA_FOLDER}/{file_name}"
+
 def general_to_json(content, func):
     json_content = {}
     try:

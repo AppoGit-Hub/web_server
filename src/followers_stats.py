@@ -23,7 +23,7 @@ FILE_AVERAGE_TEMPLATE = "followers_average_%s.json"
 TITLE_TOTAL_TEMPLATE = "Total %s on the last 7 days"
 TITAL_AVERAGE_TEMPLATE = "Average %s on the last 7 days"
 
-keys, error = utils.read_json_from_file(f"{constant.DATA_FOLDER}/keys.json")
+keys, error = utils.read_json_from_file(utils.get_path_for_resource("keys.json"))
 if error != constant.JSON_FILE_LOAD_SUCCES:
     print(f"Couldnt load keys. Got {error}")
 
@@ -60,7 +60,7 @@ def create_average(filename, global_followers_stats, metric):
     return average_sorted
 
 def create_follower_stats():
-    api_permanent_file = read_json_from_file(f"{constant.DATA_FOLDER}/{constant.API_PERMANENT_DATA_FILENAME}")
+    api_permanent_file = read_json_from_file(utils.get_path_for_resource(constant.API_PERMANENT_DATA_FILENAME))
 
     last_time_got_followers_stats = datetime.strptime(api_permanent_file["last_time_got_followers_stats"], DATE_TIME_FORMAT)
     today = datetime.utcnow()
@@ -116,9 +116,9 @@ def create_follower_stats():
         print(f"{request_per_sec} requests/sec. {request_per_sec * 900} requests/15min")
 
         api_permanent_file["last_time_got_followers_stats"] = str(today)
-        write_json_from_file(f"{constant.DATA_FOLDER}/{constant.API_PERMANENT_DATA_FILENAME}", api_permanent_file)
+        write_json_from_file(utils.get_path_for_resource(constant.API_PERMANENT_DATA_FILENAME), api_permanent_file)
 
-        write_json_from_file(f"{constant.DATA_FOLDER}/{FOLLOWERS_STATS_FILENAME}", followers_stats)
+        write_json_from_file(utils.get_path_for_resource(FOLLOWERS_STATS_FILENAME), followers_stats)
 
         #global_stats are made:
 
@@ -142,11 +142,11 @@ def create_follower_stats():
 
             global_followers_stats.update({username : global_metric})
 
-        write_json_from_file(f"{constant.DATA_FOLDER}/{GLOBAL_FOLLOWERS_STATS_FILENAME}", global_followers_stats)
+        write_json_from_file(utils.get_path_for_resource(GLOBAL_FOLLOWERS_STATS_FILENAME), global_followers_stats)
     else:
         print(f"No refresh of followers stats. Pulling from files. Delta time: {delta_time_refresh}")
-        followers_stats = read_json_from_file(f"{constant.DATA_FOLDER}/{FOLLOWERS_STATS_FILENAME}")
-        global_followers_stats = read_json_from_file(f"{constant.DATA_FOLDER}/{GLOBAL_FOLLOWERS_STATS_FILENAME}")
+        followers_stats = read_json_from_file(utils.get_path_for_resource(FOLLOWERS_STATS_FILENAME))
+        global_followers_stats = read_json_from_file(utils.get_path_for_resource(GLOBAL_FOLLOWERS_STATS_FILENAME))
 
     #sub_followers_stats are made:
 
@@ -162,11 +162,11 @@ def create_follower_stats():
 
     #total_followers
     
-    make_narow(f"{constant.DATA_FOLDER}/{FILE_TOTAL_TEMPLATE % 'retweet'}", "retweet_count")
-    make_narow(f"{constant.DATA_FOLDER}/{FILE_TOTAL_TEMPLATE % 'reply'}", "reply_count")
-    make_narow(f"{constant.DATA_FOLDER}/{FILE_TOTAL_TEMPLATE % 'like'}", "like_count")
-    make_narow(f"{constant.DATA_FOLDER}/{FILE_TOTAL_TEMPLATE % 'quote'}", "quote_count")
-    make_narow(f"{constant.DATA_FOLDER}/{FILE_TOTAL_TEMPLATE % 'tweet'}", "tweet_count")
+    make_narow(utils.get_path_for_resource(FILE_TOTAL_TEMPLATE % 'retweet'), "retweet_count")
+    make_narow(utils.get_path_for_resource(FILE_TOTAL_TEMPLATE % 'reply'), "reply_count")
+    make_narow(utils.get_path_for_resource(FILE_TOTAL_TEMPLATE % 'like'), "like_count")
+    make_narow(utils.get_path_for_resource(FILE_TOTAL_TEMPLATE % 'quote'), "quote_count")
+    make_narow(utils.get_path_for_resource(FILE_TOTAL_TEMPLATE % 'tweet'), "tweet_count")
 
     #hours and days are made...
 
@@ -200,20 +200,20 @@ def create_follower_stats():
     for hour_index in range(len(hours)):
         hours_dict.update({hour_index : hours[hour_index]})
 
-    write_json_from_file(f"{constant.DATA_FOLDER}/followers_hour_create_at.json", hours_dict)
+    write_json_from_file(utils.get_path_for_resource("followers_hour_create_at.json"), hours_dict)
 
     day_dict = {}
     for day_index in range(len(days)):
         day_dict.update({num_till_day[day_index] : days[day_index]})
 
-    write_json_from_file(f"{constant.DATA_FOLDER}/followers_day_create_at.json", day_dict)
+    write_json_from_file(utils.get_path_for_resource("followers_day_create_at.json"), day_dict)
 
     #average_followers_stats are made...
 
-    create_average(f"{constant.DATA_FOLDER}/{FILE_AVERAGE_TEMPLATE % 'like'}", global_followers_stats, "like_count")
-    create_average(f"{constant.DATA_FOLDER}/{FILE_AVERAGE_TEMPLATE % 'reply'}", global_followers_stats, "reply_count")
-    create_average(f"{constant.DATA_FOLDER}/{FILE_AVERAGE_TEMPLATE % 'retweet'}", global_followers_stats, "retweet_count")
-    create_average(f"{constant.DATA_FOLDER}/{FILE_AVERAGE_TEMPLATE % 'quote'}", global_followers_stats, "quote_count")
+    create_average(utils.get_path_for_resource(FILE_AVERAGE_TEMPLATE % 'like'), global_followers_stats, "like_count")
+    create_average(utils.get_path_for_resource(FILE_AVERAGE_TEMPLATE % 'reply'), global_followers_stats, "reply_count")
+    create_average(utils.get_path_for_resource(FILE_AVERAGE_TEMPLATE % 'retweet'), global_followers_stats, "retweet_count")
+    create_average(utils.get_path_for_resource(FILE_AVERAGE_TEMPLATE % 'quote'), global_followers_stats, "quote_count")
 
 if __name__ == "__main__":
     create_follower_stats()
